@@ -1,16 +1,16 @@
 :root {
   --body-bg-color: #f5f7f9;
-  --content-bg-color: #fff;
-  --card-bg-color: #f5f5f5;
-  --text-color: #555;
+  --content-bg-color: rgba(255,255,255,0);
+  --card-bg-color: rgba(0,0,0,0.2);
+  --text-color: #f5f5f5;
   --blockquote-color: #666;
-  --link-color: #555;
-  --link-hover-color: #222;
+  --link-color: #f5f5f5;
+  --link-hover-color: rgba(245,245,245,0.6);
   --brand-color: #fff;
   --brand-hover-color: #fff;
   --table-row-odd-bg-color: #f9f9f9;
   --table-row-hover-bg-color: #f5f5f5;
-  --menu-item-bg-color: #f5f5f5;
+  --menu-item-bg-color: rgba(255,255,255,0);
   --btn-default-bg: #fff;
   --btn-default-color: #555;
   --btn-default-border-color: #555;
@@ -1169,7 +1169,7 @@ pre .javascript .function {
 }
 .links-of-author a::before,
 .links-of-author span.exturl::before {
-  background: #268bb3;
+  background: #a2ffa4;
   border-radius: 50%;
   content: ' ';
   display: inline-block;
@@ -1671,10 +1671,7 @@ pre .javascript .function {
 }
 .post-eof {
   background: #ccc;
-  height: 1px;
-  margin: 80px auto 60px;
   text-align: center;
-  width: 8%;
 }
 .post-block:last-of-type .post-eof {
   display: none;
@@ -2445,9 +2442,10 @@ body {
   background-size: cover;
   background-repeat: no-repeat;
   background-attachment: fixed;
-  background-position: 50% 50%;
+  background-position: center;
 }
 .post {
+  background-color: rgba(255,255,255,0);
   margin-top: 60px;
   margin-bottom: 60px;
   padding: 25px;
@@ -2455,25 +2453,63 @@ body {
   -moz-box-shadow: 0 0 5px rgba(202,203,204,0.5);
 }
 .main-inner {
-  background-color: rgba(255,255,255,0);
-  padding: 0px 40px 40px 40px;
+  background-color: rgba(255,200,255,0);
+  padding: 40px 40px 40px 40px;
 }
 .post-block {
-  background-color: #fff;
+  background: rgba(0,0,0,0.5);
   margin-bottom: 24px;
   padding: 20px;
   border-radius: 30px 50px 30px 50px;
   box-shadow: 8px 7px 2px 0 rgba(0,0,0,0.12), 7px 4px 1px -2px rgba(0,0,0,0.06), 0 1px 5px 0 rgba(0,0,0,0.12);
 }
 .header-inner {
+  background: rgba(0,0,0,0.2);
   border-radius: 30px 30px 30px 30px;
   box-shadow: 8px 7px 2px 0 rgba(0,0,0,0.12), 7px 4px 1px -2px rgba(0,0,0,0.06), 0 1px 5px 0 rgba(0,0,0,0.12);
 }
+.sidebar {
+  background: rgba(0,0,0,0);
+}
 .sidebar-inner {
+  background: rgba(0,0,0,0.4);
   border-radius: 30px 30px 30px 30px;
   box-shadow: 8px 7px 2px 0 rgba(0,0,0,0.12), 7px 4px 1px -2px rgba(0,0,0,0.06), 0 1px 5px 0 rgba(0,0,0,0.12);
 }
 .pagination {
+  background: rgba(0,0,0,0.2);
   border-radius: 30px 80px 30px 80px;
   box-shadow: 8px 7px 2px 0 rgba(0,0,0,0.12), 7px 4px 1px -2px rgba(0,0,0,0.06), 0 1px 5px 0 rgba(0,0,0,0.12);
+}
+.back-to-top {
+  background: url("/images/arrasvista.jpg");
+  margin: 16px;
+}
+.back-to-top span {
+  color: rgba(255,255,255,0.8);
+}
+.back-to-top.back-to-top-on {
+  opacity: 1;
+}
+.back-to-top.back-to-top-on:hover {
+  opacity: 0.75;
+}
+.footer {
+  color: rgba(255,255,255,0.8);
+}
+.site-author-image {
+  background: rgba(0,0,0,0.2);
+  border: 2px solid rgba(34,34,34,0.25);
+}
+.site-description {
+  color: #f5f5f5;
+}
+.posts-expand .post-meta {
+  color: rgba(245,245,245,0.8);
+}
+.site-state-item-name {
+  color: rgba(245,245,245,0.8);
+}
+.site-brand-container {
+  background: rgba(0,0,0,0.7);
 }
