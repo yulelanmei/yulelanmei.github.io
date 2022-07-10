@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="重点风格迁移paper一览">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于神经网络的风格迁移初尝试(上)">
+<meta property="og:url" content="http://example.com/2022/07/10/%E5%9F%BA%E4%BA%8E%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E9%A3%8E%E6%A0%BC%E8%BF%81%E7%A7%BB%E5%88%9D%E5%B0%9D%E8%AF%95-%E4%B8%8A/index.html">
+<meta property="og:site_name" content="蓝莓的麦田">
+<meta property="og:description" content="重点风格迁移paper一览">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/2015_1.jpg">
+<meta property="og:image" content="http://example.com/images/2016_1.jpg">
+<meta property="og:image" content="http://example.com/images/2016_Perceptual_Losses_Feedforward.jpg">
+<meta property="og:image" content="http://example.com/images/2016_textureNet.jpg">
+<meta property="og:image" content="http://example.com/images/2016_instanceNorm.jpg">
+<meta property="og:image" content="http://example.com/images/2017_AdaIN.png">
+<meta property="og:image" content="http://example.com/images/2017_StyleBank.png">
+<meta property="article:published_time" content="2022-07-10T02:01:14.000Z">
+<meta property="article:modified_time" content="2022-07-10T02:54:16.050Z">
+<meta property="article:author" content="yulelanmei">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/2015_1.jpg">
+
+<link rel="canonical" href="http://example.com/2022/07/10/%E5%9F%BA%E4%BA%8E%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E9%A3%8E%E6%A0%BC%E8%BF%81%E7%A7%BB%E5%88%9D%E5%B0%9D%E8%AF%95-%E4%B8%8A/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>基于神经网络的风格迁移初尝试(上) | 蓝莓的麦田</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<style>mjx-container[jax="SVG"] {
+  direction: ltr;
+}
+
+mjx-container[jax="SVG"] > svg {
+  overflow: visible;
+}
+
+mjx-container[jax="SVG"][display="true"] {
+  display: block;
+  text-align: center;
+  margin: 1em 0;
+}
+
+mjx-container[jax="SVG"][justify="left"] {
+  text-align: left;
+}
+
+mjx-container[jax="SVG"][justify="right"] {
+  text-align: right;
+}
+
+g[data-mml-node="merror"] > g {
+  fill: red;
+  stroke: red;
+}
+
+g[data-mml-node="merror"] > rect[data-background] {
+  fill: yellow;
+  stroke: none;
+}
+
+g[data-mml-node="mtable"] > line[data-line] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > rect[data-frame] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > .mjx-dashed {
+  stroke-dasharray: 140;
+}
+
+g[data-mml-node="mtable"] > .mjx-dotted {
+  stroke-linecap: round;
+  stroke-dasharray: 0,140;
+}
+
+g[data-mml-node="mtable"] > svg {
+  overflow: visible;
+}
+
+[jax="SVG"] mjx-tool {
+  display: inline-block;
+  position: relative;
+  width: 0;
+  height: 0;
+}
+
+[jax="SVG"] mjx-tool > mjx-tip {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+mjx-tool > mjx-tip {
+  display: inline-block;
+  padding: .2em;
+  border: 1px solid #888;
+  font-size: 70%;
+  background-color: #F8F8F8;
+  color: black;
+  box-shadow: 2px 2px 5px #AAAAAA;
+}
+
+g[data-mml-node="maction"][data-toggle] {
+  cursor: pointer;
+}
+
+mjx-status {
+  display: block;
+  position: fixed;
+  left: 1em;
+  bottom: 1em;
+  min-width: 25%;
+  padding: .2em .4em;
+  border: 1px solid #888;
+  font-size: 90%;
+  background-color: #F8F8F8;
+  color: black;
+}
+
+foreignObject[data-mjx-xml] {
+  font-family: initial;
+  line-height: normal;
+  overflow: visible;
+}
+
+.MathJax path {
+  stroke-width: 3;
+}
+
+mjx-container[display="true"] {
+  overflow: auto hidden;
+}
+
+mjx-container[display="true"] + br {
+  display: none;
+}
+</style></head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">蓝莓的麦田</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/07/10/%E5%9F%BA%E4%BA%8E%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E9%A3%8E%E6%A0%BC%E8%BF%81%E7%A7%BB%E5%88%9D%E5%B0%9D%E8%AF%95-%E4%B8%8A/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/head-img.jpg">
+      <meta itemprop="name" content="yulelanmei">
+      <meta itemprop="description" content="放松一下吧~">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="蓝莓的麦田">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          基于神经网络的风格迁移初尝试(上)
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-07-10 10:01:14 / 修改时间：10:54:16" itemprop="dateCreated datePublished" datetime="2022-07-10T10:01:14+08:00">2022-07-10</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>7.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>7 分钟</span>
+            </span>
+            <div class="post-description"><center>重点风格迁移paper一览</center></div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近对风格迁移很感兴趣，如果能自己做出一个能实现风格迁移的神经网络，一定会很有意思吧(^_^)。  </p>
+<p>于是开始看各类博客和文献，尝试自己构建一个比较轻量的，能对任意分辨率目标图像和风格图像做风格迁移的网络，当然，不求迁移完成的图像质量很高。这一篇先来看一下风格迁移的一些重要paper。</p>
+<h2 id="早期"><a href="#早期" class="headerlink" title="早期"></a>早期</h2><p>风格迁移技术可分为传统风格迁移技术和神经风格迁移技术，传统风格迁移技术主要包括早期的风真实感渲染和纹理迁移，不过它们存在着泛化能力差，只能处理图像的低级细节，速度较慢，硬件性能开销较大等等缺点。</p>
+<h2 id="开山之作"><a href="#开山之作" class="headerlink" title="开山之作"></a>开山之作</h2><p>2015至2016年，Gatys等人开创性地使用深度神经网络来实现图像的风格迁移<sup>[1][2]</sup>，引发了利用深度学习实现风格迁移的浪潮。他们认为可以采用经典的CNN网络结构VGG16，取ImageNet上预训练后的权重，之后分别以一张风格图像、一张内容图像、一张随机噪声图片作为输入，通过构造内容损失函数与风格损失函数来迭代更新随机噪声图片使其在内容上接近输入的内容图像，在风格上接近输入的风格图像：</p>
+<p><img src="/images/2015_1.jpg" alt="开山之作" title="开山之作"></p>
+<p>他们将三个图片分别输入，提取不同层上的特征图，将底噪图片与内容图片做内容损失，与风格图片做风格损失，相加得到总损失函数。为了获得特征图在风格上的良好表示，他们提出了Gram矩阵：</p>
+<script type="math/tex; mode=display">G^l_{ij} = \sum_k F^l_{ik} F^l_{jk}</script><p>其中l 表示第 l 层，G 为 Gram 矩阵，Fi 和 Fj 为第 i 个和第 j 个feature map 向量。通过将一张特征图的长宽展平后，与自身的转置相乘，他们认为得到的Gram矩阵可用于计算不同特征图之间风格上的相关性。</p>
+<p>在此基础上，构建的风格损失函数为：</p>
+<script type="math/tex; mode=display">L_{style} = \sum_{l = 0}^L \frac{w_l}{4 N_l^2 M_l^2} \sum_{i,j}\left(G^l_{ij} - A^l_{ij} \right)^2</script><p>这里，G与A分别为目标风格图像和待输出图像的Gram矩阵，N为该层特征图通道数，M为该层特征图的尺寸(长 x 宽)，w为该层损失的权重。</p>
+<p>同样地，他们构建了内容损失函数：</p>
+<script type="math/tex; mode=display">L_{content} = \sum^L_{l=0} \frac{1}{2} \sum_{i,j} \left(F^l_{ij} - P^l_{ij} \right)^2</script><p>其中F为内容图像的特征图，P为待输出图像的特征图。</p>
+<p>那么总的损失即为：</p>
+<script type="math/tex; mode=display">L_{total} = \alpha L_{content} + \beta L_{style}</script><p><mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="1.448ex" height="1.025ex" role="img" focusable="false" viewBox="0 -442 640 453"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D6FC" d="M34 156Q34 270 120 356T309 442Q379 442 421 402T478 304Q484 275 485 237V208Q534 282 560 374Q564 388 566 390T582 393Q603 393 603 385Q603 376 594 346T558 261T497 161L486 147L487 123Q489 67 495 47T514 26Q528 28 540 37T557 60Q559 67 562 68T577 70Q597 70 597 62Q597 56 591 43Q579 19 556 5T512 -10H505Q438 -10 414 62L411 69L400 61Q390 53 370 41T325 18T267 -2T203 -11Q124 -11 79 39T34 156ZM208 26Q257 26 306 47T379 90L403 112Q401 255 396 290Q382 405 304 405Q235 405 183 332Q156 292 139 224T121 120Q121 71 146 49T208 26Z"></path></g></g></g></svg></mjx-container>和<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.439ex;" xmlns="http://www.w3.org/2000/svg" width="1.281ex" height="2.034ex" role="img" focusable="false" viewBox="0 -705 566 899"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D6FD" d="M29 -194Q23 -188 23 -186Q23 -183 102 134T186 465Q208 533 243 584T309 658Q365 705 429 705H431Q493 705 533 667T573 570Q573 465 469 396L482 383Q533 332 533 252Q533 139 448 65T257 -10Q227 -10 203 -2T165 17T143 40T131 59T126 65L62 -188Q60 -194 42 -194H29ZM353 431Q392 431 427 419L432 422Q436 426 439 429T449 439T461 453T472 471T484 495T493 524T501 560Q503 569 503 593Q503 611 502 616Q487 667 426 667Q384 667 347 643T286 582T247 514T224 455Q219 439 186 308T152 168Q151 163 151 147Q151 99 173 68Q204 26 260 26Q302 26 349 51T425 137Q441 171 449 214T457 279Q457 337 422 372Q380 358 347 358H337Q258 358 258 389Q258 396 261 403Q275 431 353 431Z"></path></g></g></g></svg></mjx-container>为权重的超参数，控制内容和风格的占比。</p>
+<p>在这篇开创性的文献中，可以一窥最早利用深度学习进行风格迁移的想法：用神经网络提取内容图像和风格图像的不同特征，并设计损失函数使预期输出图像在内容和风格上分别趋近于它们。当然，作为一篇开创性的文献，它把更多的学问留给它的后人们去探索。那么，咱们继续向后看看(° v ° )</p>
+<h2 id="实时风格迁移"><a href="#实时风格迁移" class="headerlink" title="实时风格迁移"></a>实时风格迁移</h2><p>Gatys等人提出了一种基于迭代优化的风格迁移方法，然而，其缺点也很明显：想要生成一张风格迁移图像，就得从头开始迭代更新一张底噪图像，生成风格迁移的图像要花费的时间会比较长(同时空间开销也会很大)。为了改善这些问题，Justin Johnson等人在其基础上进行了改进<sup>[3]</sup>，他们针对一种风格训练一个前馈网络，通过将输入图像(通常是内容图像)送入前馈网络中，直接通过前向传播实现风格迁移获得输出图像，据信能使迁移速度提高3个数量级：</p>
+<p><img src="/images/2016_1.jpg" alt="前馈模型" title="前馈模型"></p>
+<p>这里需要理清的是，最终训练得到的用于实时风格迁移的部分是前馈网络(FeedForward Net)，而其余的用于迭代优化的部分基本与[1]相同，在这里被定义为感知损失(即Perceptual Losses)网络，只是用于训练中计算损失而不参与实时风格迁移。同样值得注意的还有前馈网络的结构：</p>
+<p><img src="/images/2016_Perceptual_Losses_Feedforward.jpg" alt="前馈网络结构" title="前馈网络结构"></p>
+<p>图像首先经过一个9x9卷积，两个步长为2的3x3卷积层组成的下采样模块，再经过数个残差连接块，最后经过由两个3x3且步长1/2的卷积层，一个9x9卷积组成的上采样模块，训练结束后做风格迁移时再用tanh激活函数将输出映射到0~255的值来生成图像。他们认为，图像经过下采样后，再进行卷积相当于卷积核的感受野更大，在减少计算成本的同时有利于学习连续的内容，这样的网络结构十分有参考性。</p>
+<p>而Ulyanov等人则提出了另一种改进方法<sup>[4]</sup>，他们构建了一个结构类似于金字塔的纹理生成网络(Texture Networks)，多尺度地对随机噪声图像进行处理： </p>
+<p><img src="/images/2016_textureNet.jpg" alt="纹理生成网络" title="纹理生成网络"></p>
+<p>在这个生成网络里，他们以均匀分布获取<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="1.636ex" height="1.545ex" role="img" focusable="false" viewBox="0 -683 723 683"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D44D" d="M58 8Q58 23 64 35Q64 36 329 334T596 635L586 637Q575 637 512 637H500H476Q442 637 420 635T365 624T311 598T266 548T228 469Q227 466 226 463T224 458T223 453T222 450L221 448Q218 443 202 443Q185 443 182 453L214 561Q228 606 241 651Q249 679 253 681Q256 683 487 683H718Q723 678 723 675Q723 673 717 649Q189 54 188 52L185 49H274Q369 50 377 51Q452 60 500 100T579 247Q587 272 590 277T603 282H607Q628 282 628 271Q547 5 541 2Q538 0 300 0H124Q58 0 58 8Z"></path></g></g></g></svg></mjx-container>张尺寸不同的随机噪声图像，每张噪声图像经过包含多个卷积层和非线性激活层的卷积块处理后得到输出，再加上该噪声(有些类似于残差连接)，之后在一个主路线上连接(Join块)，连接块内有上采样模块和通道维度的连接。最终获得一个纹理生成图，训练时在后续损失函数内计算损失，与上述操作类似。</p>
+<h2 id="适于风格迁移的实例归一化"><a href="#适于风格迁移的实例归一化" class="headerlink" title="适于风格迁移的实例归一化"></a>适于风格迁移的实例归一化</h2><p>之后，Ulyanov等人在又提出了一个适用于风格迁移的归一化策略<sup>[5]</sup>：实例归一化(Instance Normalization)，即单独对一个批次(batch)中的一个样本的一个通道进行归一化(normalization)，而不是一般CNN里常用的批次归一化(Batch Normalization)：</p>
+<p><img src="/images/2016_instanceNorm.jpg" alt="实例归一化" title="实例归一化"></p>
+<p>他们发现，之前设计的纹理生成网络随着训练数据的增加，生成的效果反而越来越不好。推测是因为标准的使用BN(批次归一化)的CNN网络会受到多个不同样本中内容图像本身风格的干扰(这点是我个人猜想的，因为原论文的说辞有些令我疑惑orz)。经过研究试验，他们认为，实例归一化可以将特定于一个内容图像的对比度信息(contrast information)去除，从而使得来自风格图像的风格信息较好地迁移到内容图像上而减少内容图像本身风格的影响，大幅改善生成的风格迁移图像的质量。需要注意的是不同于批次归一化，实例归一化在测试过程中也会被保留而不是将其冻结并简化。实例归一化的公式：</p>
+<script type="math/tex; mode=display">IN(x) = \gamma \left(\frac{x - \mu(x)}{\sigma(x)}\right) + \beta</script><p>这里，<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="1.294ex" height="1.025ex" role="img" focusable="false" viewBox="0 -442 572 453"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D465" d="M52 289Q59 331 106 386T222 442Q257 442 286 424T329 379Q371 442 430 442Q467 442 494 420T522 361Q522 332 508 314T481 292T458 288Q439 288 427 299T415 328Q415 374 465 391Q454 404 425 404Q412 404 406 402Q368 386 350 336Q290 115 290 78Q290 50 306 38T341 26Q378 26 414 59T463 140Q466 150 469 151T485 153H489Q504 153 504 145Q504 144 502 134Q486 77 440 33T333 -11Q263 -11 227 52Q186 -10 133 -10H127Q78 -10 57 16T35 71Q35 103 54 123T99 143Q142 143 142 101Q142 81 130 66T107 46T94 41L91 40Q91 39 97 36T113 29T132 26Q168 26 194 71Q203 87 217 139T245 247T261 313Q266 340 266 352Q266 380 251 392T217 404Q177 404 142 372T93 290Q91 281 88 280T72 278H58Q52 284 52 289Z"></path></g></g></g></svg></mjx-container>为单个样本的单通道特征图输入，<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.489ex;" xmlns="http://www.w3.org/2000/svg" width="1.364ex" height="1.489ex" role="img" focusable="false" viewBox="0 -442 603 658"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D707" d="M58 -216Q44 -216 34 -208T23 -186Q23 -176 96 116T173 414Q186 442 219 442Q231 441 239 435T249 423T251 413Q251 401 220 279T187 142Q185 131 185 107V99Q185 26 252 26Q261 26 270 27T287 31T302 38T315 45T327 55T338 65T348 77T356 88T365 100L372 110L408 253Q444 395 448 404Q461 431 491 431Q504 431 512 424T523 412T525 402L449 84Q448 79 448 68Q448 43 455 35T476 26Q485 27 496 35Q517 55 537 131Q543 151 547 152Q549 153 557 153H561Q580 153 580 144Q580 138 575 117T555 63T523 13Q510 0 491 -8Q483 -10 467 -10Q446 -10 429 -4T402 11T385 29T376 44T374 51L368 45Q362 39 350 30T324 12T288 -4T246 -11Q199 -11 153 12L129 -85Q108 -167 104 -180T92 -202Q76 -216 58 -216Z"></path></g></g></g></svg></mjx-container>为均值，<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="1.292ex" height="1ex" role="img" focusable="false" viewBox="0 -431 571 442"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D70E" d="M184 -11Q116 -11 74 34T31 147Q31 247 104 333T274 430Q275 431 414 431H552Q553 430 555 429T559 427T562 425T565 422T567 420T569 416T570 412T571 407T572 401Q572 357 507 357Q500 357 490 357T476 358H416L421 348Q439 310 439 263Q439 153 359 71T184 -11ZM361 278Q361 358 276 358Q152 358 115 184Q114 180 114 178Q106 141 106 117Q106 67 131 47T188 26Q242 26 287 73Q316 103 334 153T356 233T361 278Z"></path></g></g></g></svg></mjx-container>为标准差，<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.489ex;" xmlns="http://www.w3.org/2000/svg" width="1.229ex" height="1.486ex" role="img" focusable="false" viewBox="0 -441 543 657"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D6FE" d="M31 249Q11 249 11 258Q11 275 26 304T66 365T129 418T206 441Q233 441 239 440Q287 429 318 386T371 255Q385 195 385 170Q385 166 386 166L398 193Q418 244 443 300T486 391T508 430Q510 431 524 431H537Q543 425 543 422Q543 418 522 378T463 251T391 71Q385 55 378 6T357 -100Q341 -165 330 -190T303 -216Q286 -216 286 -188Q286 -138 340 32L346 51L347 69Q348 79 348 100Q348 257 291 317Q251 355 196 355Q148 355 108 329T51 260Q49 251 47 251Q45 249 31 249Z"></path></g></g></g></svg></mjx-container> 和 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.439ex;" xmlns="http://www.w3.org/2000/svg" width="1.281ex" height="2.034ex" role="img" focusable="false" viewBox="0 -705 566 899"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D6FD" d="M29 -194Q23 -188 23 -186Q23 -183 102 134T186 465Q208 533 243 584T309 658Q365 705 429 705H431Q493 705 533 667T573 570Q573 465 469 396L482 383Q533 332 533 252Q533 139 448 65T257 -10Q227 -10 203 -2T165 17T143 40T131 59T126 65L62 -188Q60 -194 42 -194H29ZM353 431Q392 431 427 419L432 422Q436 426 439 429T449 439T461 453T472 471T484 495T493 524T501 560Q503 569 503 593Q503 611 502 616Q487 667 426 667Q384 667 347 643T286 582T247 514T224 455Q219 439 186 308T152 168Q151 163 151 147Q151 99 173 68Q204 26 260 26Q302 26 349 51T425 137Q441 171 449 214T457 279Q457 337 422 372Q380 358 347 358H337Q258 358 258 389Q258 396 261 403Q275 431 353 431Z"></path></g></g></g></svg></mjx-container>为需要学习的仿射参数。</p>
+<h2 id="更好的实例归一化"><a href="#更好的实例归一化" class="headerlink" title="更好的实例归一化"></a>更好的实例归一化</h2><p>在实例归一化被提出后，陆续有对实例归一化的改进研究出现，这里介绍两种改进的研究。</p>
+<h3 id="条件实例归一化-conditional-IN"><a href="#条件实例归一化-conditional-IN" class="headerlink" title="条件实例归一化(conditional IN)"></a>条件实例归一化(conditional IN)</h3><p>Dumoulin等人<sup>[11]</sup>注意到，风格的迁移几乎只需要通过实例归一化的仿射参数来控制，那么通过使用针对多个不同风格训练得到的不同的仿射参数应用到归一化的内容上，就可以实现一个内容图像迁移到多种风格上：</p>
+<script type="math/tex; mode=display">CIN(x) = \gamma^s \left(\frac{x - \mu(x)}{\sigma(x)}\right) + \beta^s</script><p>这里<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.489ex;" xmlns="http://www.w3.org/2000/svg" width="2.283ex" height="2.017ex" role="img" focusable="false" viewBox="0 -675.5 1008.9 891.5"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msup"><g data-mml-node="mi"><path data-c="1D6FE" d="M31 249Q11 249 11 258Q11 275 26 304T66 365T129 418T206 441Q233 441 239 440Q287 429 318 386T371 255Q385 195 385 170Q385 166 386 166L398 193Q418 244 443 300T486 391T508 430Q510 431 524 431H537Q543 425 543 422Q543 418 522 378T463 251T391 71Q385 55 378 6T357 -100Q341 -165 330 -190T303 -216Q286 -216 286 -188Q286 -138 340 32L346 51L347 69Q348 79 348 100Q348 257 291 317Q251 355 196 355Q148 355 108 329T51 260Q49 251 47 251Q45 249 31 249Z"></path></g><g data-mml-node="mi" transform="translate(627.3,363) scale(0.707)"><path data-c="1D460" d="M131 289Q131 321 147 354T203 415T300 442Q362 442 390 415T419 355Q419 323 402 308T364 292Q351 292 340 300T328 326Q328 342 337 354T354 372T367 378Q368 378 368 379Q368 382 361 388T336 399T297 405Q249 405 227 379T204 326Q204 301 223 291T278 274T330 259Q396 230 396 163Q396 135 385 107T352 51T289 7T195 -10Q118 -10 86 19T53 87Q53 126 74 143T118 160Q133 160 146 151T160 120Q160 94 142 76T111 58Q109 57 108 57T107 55Q108 52 115 47T146 34T201 27Q237 27 263 38T301 66T318 97T323 122Q323 150 302 164T254 181T195 196T148 231Q131 256 131 289Z"></path></g></g></g></g></svg></mjx-container> 和 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.439ex;" xmlns="http://www.w3.org/2000/svg" width="2.219ex" height="2.034ex" role="img" focusable="false" viewBox="0 -705 980.6 899"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msup"><g data-mml-node="mi"><path data-c="1D6FD" d="M29 -194Q23 -188 23 -186Q23 -183 102 134T186 465Q208 533 243 584T309 658Q365 705 429 705H431Q493 705 533 667T573 570Q573 465 469 396L482 383Q533 332 533 252Q533 139 448 65T257 -10Q227 -10 203 -2T165 17T143 40T131 59T126 65L62 -188Q60 -194 42 -194H29ZM353 431Q392 431 427 419L432 422Q436 426 439 429T449 439T461 453T472 471T484 495T493 524T501 560Q503 569 503 593Q503 611 502 616Q487 667 426 667Q384 667 347 643T286 582T247 514T224 455Q219 439 186 308T152 168Q151 163 151 147Q151 99 173 68Q204 26 260 26Q302 26 349 51T425 137Q441 171 449 214T457 279Q457 337 422 372Q380 358 347 358H337Q258 358 258 389Q258 396 261 403Q275 431 353 431Z"></path></g><g data-mml-node="mi" transform="translate(599,363) scale(0.707)"><path data-c="1D460" d="M131 289Q131 321 147 354T203 415T300 442Q362 442 390 415T419 355Q419 323 402 308T364 292Q351 292 340 300T328 326Q328 342 337 354T354 372T367 378Q368 378 368 379Q368 382 361 388T336 399T297 405Q249 405 227 379T204 326Q204 301 223 291T278 274T330 259Q396 230 396 163Q396 135 385 107T352 51T289 7T195 -10Q118 -10 86 19T53 87Q53 126 74 143T118 160Q133 160 146 151T160 120Q160 94 142 76T111 58Q109 57 108 57T107 55Q108 52 115 47T146 34T201 27Q237 27 263 38T301 66T318 97T323 122Q323 150 302 164T254 181T195 196T148 231Q131 256 131 289Z"></path></g></g></g></g></svg></mjx-container>分别为不同风格图像对应的一系列仿射参数矩阵，对于某一种风格，只需在矩阵内选取对应的一行进行应用即可。</p>
+<h3 id="自适应实例归一化-adaptive-IN"><a href="#自适应实例归一化-adaptive-IN" class="headerlink" title="自适应实例归一化(adaptive IN)"></a>自适应实例归一化(adaptive IN)</h3><p>Huang等人<sup>[10]</sup>的实验结果表明，实例归一化IN对风格迁移图像生成质量的显著改善来自于其对风格的归一化效果，仿射参数很大程度上决定了生成图像的风格，仿射参数的改变能够使得迁移得到的图像的风格产生明显不同。基于这些观察，他们提出了一个对IN的简单扩展，通过设计根据输入的风格自适应的而不是需要学习得到的仿射参数使得风格迁移网络适应任意不同的风格，同时保证较高的性能：</p>
+<script type="math/tex; mode=display">AdaIN(x, y) = \sigma(y) \left( \frac{x - \mu(x)}{\sigma(x)}\right) + \mu(y)</script><p>其中，x为内容输入，y为风格输入。自适应实例归一化通过计算均值和方差这一类特征信息，在特征空间中完成风格迁移，同时还能保留内容图像的空间结构，编码出细微的风格信息balabala……简而言之，这样的一个自适应IN不仅运行成本很小，应用简单，效果也不赖~</p>
+<p>作者给出的一种利用自适应归一化IN的风格迁移架构：</p>
+<p><img src="/images/2017_AdaIN.png" alt=""></p>
+<p>这里，他们使用VGG19的前面部分作为编码器提取内容图像和风格图像的特征，利用AdaIN进行风格迁移，再训练一个解码器g用以把迁移得到的特征图转换回图像空间，最后将迁移得到的图像、解码的图像、输入的风格图像利用VGG计算损失，这就和前述的差不多了。他们给出的网络还能够适应任意的风格图像输入，很值得参考哦。</p>
+<h2 id="基于局部仿射变换与语义分割的迁移约束"><a href="#基于局部仿射变换与语义分割的迁移约束" class="headerlink" title="基于局部仿射变换与语义分割的迁移约束"></a>基于局部仿射变换与语义分割的迁移约束</h2><p>在之前的风格迁移方法中，风格迁移往往会使得迁移后的图像中不少的物体边缘产生伪影和类似绘画风格的视觉扭曲，导致存在失真。为了能让迁移的图像更具照片般的真实感，Luan等人在前述研究的基础上提出了利用局部仿射变换和语义分割来约束生成图像的方法<sup>[6]</sup>。</p>
+<p>首先，他们基于Levin等人<sup>[7]</sup>的图像抠图的闭式解研究，在其中的Matting-Laplacian的基础上构建出一个损失函数中的可运用的正则化项，惩罚那些不能很好通过通过局部仿射变换解释的输出：</p>
+<script type="math/tex; mode=display">L_m = \sum^3_{c=1} V_c[O]^T M_I V_c[O]</script><p>这里，<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="5.184ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 2291.2 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msub"><g data-mml-node="mi"><path data-c="1D449" d="M52 648Q52 670 65 683H76Q118 680 181 680Q299 680 320 683H330Q336 677 336 674T334 656Q329 641 325 637H304Q282 635 274 635Q245 630 242 620Q242 618 271 369T301 118L374 235Q447 352 520 471T595 594Q599 601 599 609Q599 633 555 637Q537 637 537 648Q537 649 539 661Q542 675 545 679T558 683Q560 683 570 683T604 682T668 681Q737 681 755 683H762Q769 676 769 672Q769 655 760 640Q757 637 743 637Q730 636 719 635T698 630T682 623T670 615T660 608T652 599T645 592L452 282Q272 -9 266 -16Q263 -18 259 -21L241 -22H234Q216 -22 216 -15Q213 -9 177 305Q139 623 138 626Q133 637 76 637H59Q52 642 52 648Z"></path></g><g data-mml-node="mi" transform="translate(616,-150) scale(0.707)"><path data-c="1D450" d="M34 159Q34 268 120 355T306 442Q362 442 394 418T427 355Q427 326 408 306T360 285Q341 285 330 295T319 325T330 359T352 380T366 386H367Q367 388 361 392T340 400T306 404Q276 404 249 390Q228 381 206 359Q162 315 142 235T121 119Q121 73 147 50Q169 26 205 26H209Q321 26 394 111Q403 121 406 121Q410 121 419 112T429 98T420 83T391 55T346 25T282 0T202 -11Q127 -11 81 37T34 159Z"></path></g></g><g data-mml-node="mo" transform="translate(972.2,0)"><path data-c="5B" d="M118 -250V750H255V710H158V-210H255V-250H118Z"></path></g><g data-mml-node="mi" transform="translate(1250.2,0)"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(2013.2,0)"><path data-c="5D" d="M22 710V750H159V-250H22V-210H119V710H22Z"></path></g></g></g></svg></mjx-container>为输出图像<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.05ex;" xmlns="http://www.w3.org/2000/svg" width="1.726ex" height="1.643ex" role="img" focusable="false" viewBox="0 -704 763 726"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g></g></g></svg></mjx-container> 中c通道的线性向量表示（N x 1，N为像素数），<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.339ex;" xmlns="http://www.w3.org/2000/svg" width="3.189ex" height="1.885ex" role="img" focusable="false" viewBox="0 -683 1409.4 833"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msub"><g data-mml-node="mi"><path data-c="1D440" d="M289 629Q289 635 232 637Q208 637 201 638T194 648Q194 649 196 659Q197 662 198 666T199 671T201 676T203 679T207 681T212 683T220 683T232 684Q238 684 262 684T307 683Q386 683 398 683T414 678Q415 674 451 396L487 117L510 154Q534 190 574 254T662 394Q837 673 839 675Q840 676 842 678T846 681L852 683H948Q965 683 988 683T1017 684Q1051 684 1051 673Q1051 668 1048 656T1045 643Q1041 637 1008 637Q968 636 957 634T939 623Q936 618 867 340T797 59Q797 55 798 54T805 50T822 48T855 46H886Q892 37 892 35Q892 19 885 5Q880 0 869 0Q864 0 828 1T736 2Q675 2 644 2T609 1Q592 1 592 11Q592 13 594 25Q598 41 602 43T625 46Q652 46 685 49Q699 52 704 61Q706 65 742 207T813 490T848 631L654 322Q458 10 453 5Q451 4 449 3Q444 0 433 0Q418 0 415 7Q413 11 374 317L335 624L267 354Q200 88 200 79Q206 46 272 46H282Q288 41 289 37T286 19Q282 3 278 1Q274 0 267 0Q265 0 255 0T221 1T157 2Q127 2 95 1T58 0Q43 0 39 2T35 11Q35 13 38 25T43 40Q45 46 65 46Q135 46 154 86Q158 92 223 354T289 629Z"></path></g><g data-mml-node="mi" transform="translate(1003,-150) scale(0.707)"><path data-c="1D43C" d="M43 1Q26 1 26 10Q26 12 29 24Q34 43 39 45Q42 46 54 46H60Q120 46 136 53Q137 53 138 54Q143 56 149 77T198 273Q210 318 216 344Q286 624 286 626Q284 630 284 631Q274 637 213 637H193Q184 643 189 662Q193 677 195 680T209 683H213Q285 681 359 681Q481 681 487 683H497Q504 676 504 672T501 655T494 639Q491 637 471 637Q440 637 407 634Q393 631 388 623Q381 609 337 432Q326 385 315 341Q245 65 245 59Q245 52 255 50T307 46H339Q345 38 345 37T342 19Q338 6 332 0H316Q279 2 179 2Q143 2 113 2T65 2T43 1Z"></path></g></g></g></g></svg></mjx-container>为对称矩阵（N x N），取决于输入的图像 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="1.14ex" height="1.545ex" role="img" focusable="false" viewBox="0 -683 504 683"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D43C" d="M43 1Q26 1 26 10Q26 12 29 24Q34 43 39 45Q42 46 54 46H60Q120 46 136 53Q137 53 138 54Q143 56 149 77T198 273Q210 318 216 344Q286 624 286 626Q284 630 284 631Q274 637 213 637H193Q184 643 189 662Q193 677 195 680T209 683H213Q285 681 359 681Q481 681 487 683H497Q504 676 504 672T501 655T494 639Q491 637 471 637Q440 637 407 634Q393 631 388 623Q381 609 337 432Q326 385 315 341Q245 65 245 59Q245 52 255 50T307 46H339Q345 38 345 37T342 19Q338 6 332 0H316Q279 2 179 2Q143 2 113 2T65 2T43 1Z"></path></g></g></g></svg></mjx-container>，其有N个像素。这是由[7]中描述的最小二次代价函数得来的，可理解为根据输入图像的每个小局部的各RGB通道值映射为一个灰度值构造出matte(蒙版，类似mask?)，而图像中的物体边缘在各通道中位置固定，因此映射得到的matte可用以描述整体边缘失真的程度(如果我没理解错的话)。原文<sup>[7]</sup>有对这个式子详尽的推导(全是线代)和计算方式，包括输出图像的线性向量表示和输入图像的拉普拉斯矩阵，但是我这个数学渣渣还有些搞不太懂QWQ，还请各位大佬不吝赐教。</p>
+<p>除此之外，Luan等人还使用了语义分割来增强风格损失的效果。他们认为，之前的研究使用的Gram矩阵是在整个图像上进行计算的，这可能会限制风格迁移对不同的语义的适应性以及风格“溢出”等问题。他们使用[8]作为语义分割网络，为一组有着常见标签(天空、建筑物、水等)的内容和风格图像进行语义分割生成图像分割掩码(mask)，并作为附加通道连接到输入图像上，需要注意的是为了避免产生只单独存在于内容图像的语义标签，作者限制其只能在参考风格的语义标签中选择，这样做是因为他们发现这些语义标签在前后基本上是等效的(例如湖和海)。在后续的特征图上应用这些掩码：</p>
+<script type="math/tex; mode=display">F_{l,c}[O] = F_l[O]M_{l,c}[I]\ \ \ \ F_{l,c}[S] = F_l[S]M_{l,c}[S]</script><p>这里，<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="1.14ex" height="1.545ex" role="img" focusable="false" viewBox="0 -683 504 683"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D43C" d="M43 1Q26 1 26 10Q26 12 29 24Q34 43 39 45Q42 46 54 46H60Q120 46 136 53Q137 53 138 54Q143 56 149 77T198 273Q210 318 216 344Q286 624 286 626Q284 630 284 631Q274 637 213 637H193Q184 643 189 662Q193 677 195 680T209 683H213Q285 681 359 681Q481 681 487 683H497Q504 676 504 672T501 655T494 639Q491 637 471 637Q440 637 407 634Q393 631 388 623Q381 609 337 432Q326 385 315 341Q245 65 245 59Q245 52 255 50T307 46H339Q345 38 345 37T342 19Q338 6 332 0H316Q279 2 179 2Q143 2 113 2T65 2T43 1Z"></path></g></g></g></svg></mjx-container> 为输入的内容图像，<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.05ex;" xmlns="http://www.w3.org/2000/svg" width="1.726ex" height="1.643ex" role="img" focusable="false" viewBox="0 -704 763 726"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g></g></g></svg></mjx-container>为输出的风格迁移图像，<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.05ex;" xmlns="http://www.w3.org/2000/svg" width="1.459ex" height="1.645ex" role="img" focusable="false" viewBox="0 -705 645 727"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D446" d="M308 24Q367 24 416 76T466 197Q466 260 414 284Q308 311 278 321T236 341Q176 383 176 462Q176 523 208 573T273 648Q302 673 343 688T407 704H418H425Q521 704 564 640Q565 640 577 653T603 682T623 704Q624 704 627 704T632 705Q645 705 645 698T617 577T585 459T569 456Q549 456 549 465Q549 471 550 475Q550 478 551 494T553 520Q553 554 544 579T526 616T501 641Q465 662 419 662Q362 662 313 616T263 510Q263 480 278 458T319 427Q323 425 389 408T456 390Q490 379 522 342T554 242Q554 216 546 186Q541 164 528 137T492 78T426 18T332 -20Q320 -22 298 -22Q199 -22 144 33L134 44L106 13Q83 -14 78 -18T65 -22Q52 -22 52 -14Q52 -11 110 221Q112 227 130 227H143Q149 221 149 216Q149 214 148 207T144 186T142 153Q144 114 160 87T203 47T255 29T308 24Z"></path></g></g></g></svg></mjx-container>为风格图像。<br>之后构造增强的风格损失函数：</p>
+<script type="math/tex; mode=display">L^l_{s+} = \sum^C_{c=1} \frac{1}{2N^2_{l,c}} \sum_{ij} \left(G_{l,c}[O] - G_{l,c}[S]\right)^2_{ij}</script><p>这里的 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.05ex;" xmlns="http://www.w3.org/2000/svg" width="1.778ex" height="1.645ex" role="img" focusable="false" viewBox="0 -705 786 727"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D43A" d="M50 252Q50 367 117 473T286 641T490 704Q580 704 633 653Q642 643 648 636T656 626L657 623Q660 623 684 649Q691 655 699 663T715 679T725 690L740 705H746Q760 705 760 698Q760 694 728 561Q692 422 692 421Q690 416 687 415T669 413H653Q647 419 647 422Q647 423 648 429T650 449T651 481Q651 552 619 605T510 659Q492 659 471 656T418 643T357 615T294 567T236 496T189 394T158 260Q156 242 156 221Q156 173 170 136T206 79T256 45T308 28T353 24Q407 24 452 47T514 106Q517 114 529 161T541 214Q541 222 528 224T468 227H431Q425 233 425 235T427 254Q431 267 437 273H454Q494 271 594 271Q634 271 659 271T695 272T707 272Q721 272 721 263Q721 261 719 249Q714 230 709 228Q706 227 694 227Q674 227 653 224Q646 221 643 215T629 164Q620 131 614 108Q589 6 586 3Q584 1 581 1Q571 1 553 21T530 52Q530 53 528 52T522 47Q448 -22 322 -22Q201 -22 126 55T50 252Z"></path></g></g></g></svg></mjx-container> 为对应特征图的 Gram 矩阵，其余与前述一致。 这个语义分割的应用还是有点简单直接的。</p>
+<h2 id="分离的风格与内容"><a href="#分离的风格与内容" class="headerlink" title="分离的风格与内容"></a>分离的风格与内容</h2><p>在之前的研究中，许多风格迁移方法在应用新风格时需要对整个网络进行整体的重新训练，在要使用大量新风格时显得十分困难，那么可否将内容与风格的模型分开，使得只需要将不同部分组合在一起便可以完成风格迁移呢？Chen等人便提出了一种将内容与风格分离的架构<sup>[9]</sup>，StyleBank，以期将内容和风格的模型学习分离。</p>
+<p>StyleBank中，内容图像由一个自动编码器分解得到多个中间特征嵌入，而多个风格图像分别由一个对应的滤波器组(StyleBank Layer)加以提炼，风格迁移则通过将滤波器组应用到特征嵌入中实现，最终由解码器将迁移后的特征转换为对应的风格迁移图像：</p>
+<p><img src="/images/2017_StyleBank.png" alt=""></p>
+<p>这里，图像编码器<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="1.729ex" height="1.538ex" role="img" focusable="false" viewBox="0 -680 764 680"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D438" d="M492 213Q472 213 472 226Q472 230 477 250T482 285Q482 316 461 323T364 330H312Q311 328 277 192T243 52Q243 48 254 48T334 46Q428 46 458 48T518 61Q567 77 599 117T670 248Q680 270 683 272Q690 274 698 274Q718 274 718 261Q613 7 608 2Q605 0 322 0H133Q31 0 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H757Q764 676 764 669Q764 664 751 557T737 447Q735 440 717 440H705Q698 445 698 453L701 476Q704 500 704 528Q704 558 697 578T678 609T643 625T596 632T532 634H485Q397 633 392 631Q388 629 386 622Q385 619 355 499T324 377Q347 376 372 376H398Q464 376 489 391T534 472Q538 488 540 490T557 493Q562 493 565 493T570 492T572 491T574 487T577 483L544 351Q511 218 508 216Q505 213 492 213Z"></path></g></g></g></svg></mjx-container>，StyleBank层<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="2.011ex" height="1.545ex" role="img" focusable="false" viewBox="0 -683 889 683"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D43E" d="M285 628Q285 635 228 637Q205 637 198 638T191 647Q191 649 193 661Q199 681 203 682Q205 683 214 683H219Q260 681 355 681Q389 681 418 681T463 682T483 682Q500 682 500 674Q500 669 497 660Q496 658 496 654T495 648T493 644T490 641T486 639T479 638T470 637T456 637Q416 636 405 634T387 623L306 305Q307 305 490 449T678 597Q692 611 692 620Q692 635 667 637Q651 637 651 648Q651 650 654 662T659 677Q662 682 676 682Q680 682 711 681T791 680Q814 680 839 681T869 682Q889 682 889 672Q889 650 881 642Q878 637 862 637Q787 632 726 586Q710 576 656 534T556 455L509 418L518 396Q527 374 546 329T581 244Q656 67 661 61Q663 59 666 57Q680 47 717 46H738Q744 38 744 37T741 19Q737 6 731 0H720Q680 3 625 3Q503 3 488 0H478Q472 6 472 9T474 27Q478 40 480 43T491 46H494Q544 46 544 71Q544 75 517 141T485 216L427 354L359 301L291 248L268 155Q245 63 245 58Q245 51 253 49T303 46H334Q340 37 340 35Q340 19 333 5Q328 0 317 0Q314 0 280 1T180 2Q118 2 85 2T49 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q147 65 216 339T285 628Z"></path></g></g></g></svg></mjx-container>，图像解码器<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="1.873ex" height="1.545ex" role="img" focusable="false" viewBox="0 -683 828 683"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D437" d="M287 628Q287 635 230 637Q207 637 200 638T193 647Q193 655 197 667T204 682Q206 683 403 683Q570 682 590 682T630 676Q702 659 752 597T803 431Q803 275 696 151T444 3L430 1L236 0H125H72Q48 0 41 2T33 11Q33 13 36 25Q40 41 44 43T67 46Q94 46 127 49Q141 52 146 61Q149 65 218 339T287 628ZM703 469Q703 507 692 537T666 584T629 613T590 629T555 636Q553 636 541 636T512 636T479 637H436Q392 637 386 627Q384 623 313 339T242 52Q242 48 253 48T330 47Q335 47 349 47T373 46Q499 46 581 128Q617 164 640 212T683 339T703 469Z"></path></g></g></g></svg></mjx-container>分别构成了两个分支：自动编码器(E → D)和风格化(E → K → D)，对于自动编码器分支，其训练其输出图像 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.05ex;" xmlns="http://www.w3.org/2000/svg" width="1.726ex" height="1.643ex" role="img" focusable="false" viewBox="0 -704 763 726"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g></g></g></svg></mjx-container> 尽可能接近输入图像 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="1.14ex" height="1.545ex" role="img" focusable="false" viewBox="0 -683 504 683"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D43C" d="M43 1Q26 1 26 10Q26 12 29 24Q34 43 39 45Q42 46 54 46H60Q120 46 136 53Q137 53 138 54Q143 56 149 77T198 273Q210 318 216 344Q286 624 286 626Q284 630 284 631Q274 637 213 637H193Q184 643 189 662Q193 677 195 680T209 683H213Q285 681 359 681Q481 681 487 683H497Q504 676 504 672T501 655T494 639Q491 637 471 637Q440 637 407 634Q393 631 388 623Q381 609 337 432Q326 385 315 341Q245 65 245 59Q245 52 255 50T307 46H339Q345 38 345 37T342 19Q338 6 332 0H316Q279 2 179 2Q143 2 113 2T65 2T43 1Z"></path></g></g></g></svg></mjx-container>；对于风格化分支，<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="2.011ex" height="1.545ex" role="img" focusable="false" viewBox="0 -683 889 683"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D43E" d="M285 628Q285 635 228 637Q205 637 198 638T191 647Q191 649 193 661Q199 681 203 682Q205 683 214 683H219Q260 681 355 681Q389 681 418 681T463 682T483 682Q500 682 500 674Q500 669 497 660Q496 658 496 654T495 648T493 644T490 641T486 639T479 638T470 637T456 637Q416 636 405 634T387 623L306 305Q307 305 490 449T678 597Q692 611 692 620Q692 635 667 637Q651 637 651 648Q651 650 654 662T659 677Q662 682 676 682Q680 682 711 681T791 680Q814 680 839 681T869 682Q889 682 889 672Q889 650 881 642Q878 637 862 637Q787 632 726 586Q710 576 656 534T556 455L509 418L518 396Q527 374 546 329T581 244Q656 67 661 61Q663 59 666 57Q680 47 717 46H738Q744 38 744 37T741 19Q737 6 731 0H720Q680 3 625 3Q503 3 488 0H478Q472 6 472 9T474 27Q478 40 480 43T491 46H494Q544 46 544 71Q544 75 517 141T485 216L427 354L359 301L291 248L268 155Q245 63 245 58Q245 51 253 49T303 46H334Q340 37 340 35Q340 19 333 5Q328 0 317 0Q314 0 280 1T180 2Q118 2 85 2T49 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q147 65 216 339T285 628Z"></path></g></g></g></svg></mjx-container>中N种风格对应的滤波器将图像编码器输出的多张特征图<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="1.695ex" height="1.538ex" role="img" focusable="false" viewBox="0 -680 749 680"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D439" d="M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z"></path></g></g></g></svg></mjx-container>处理得到迁移特征<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.357ex;" xmlns="http://www.w3.org/2000/svg" width="3.249ex" height="1.895ex" role="img" focusable="false" viewBox="0 -680 1436 837.8"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D452" d="M39 168Q39 225 58 272T107 350T174 402T244 433T307 442H310Q355 442 388 420T421 355Q421 265 310 237Q261 224 176 223Q139 223 138 221Q138 219 132 186T125 128Q125 81 146 54T209 26T302 45T394 111Q403 121 406 121Q410 121 419 112T429 98T420 82T390 55T344 24T281 -1T205 -11Q126 -11 83 42T39 168ZM373 353Q367 405 305 405Q272 405 244 391T199 357T170 316T154 280T149 261Q149 260 169 260Q282 260 327 284T373 353Z"></path></g><g data-mml-node="msub" transform="translate(466,0)"><g data-mml-node="mi"><path data-c="1D439" d="M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z"></path></g><g data-mml-node="mi" transform="translate(676,-150) scale(0.707)"><path data-c="1D456" d="M184 600Q184 624 203 642T247 661Q265 661 277 649T290 619Q290 596 270 577T226 557Q211 557 198 567T184 600ZM21 287Q21 295 30 318T54 369T98 420T158 442Q197 442 223 419T250 357Q250 340 236 301T196 196T154 83Q149 61 149 51Q149 26 166 26Q175 26 185 29T208 43T235 78T260 137Q263 149 265 151T282 153Q302 153 302 143Q302 135 293 112T268 61T223 11T161 -11Q129 -11 102 10T74 74Q74 91 79 106T122 220Q160 321 166 341T173 380Q173 404 156 404H154Q124 404 99 371T61 287Q60 286 59 284T58 281T56 279T53 278T49 278T41 278H27Q21 284 21 287Z"></path></g></g></g></g></svg></mjx-container>，得到的输出图像<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="12.406ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 5483.5 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mi" transform="translate(763,0)"><path data-c="1D456" d="M184 600Q184 624 203 642T247 661Q265 661 277 649T290 619Q290 596 270 577T226 557Q211 557 198 567T184 600ZM21 287Q21 295 30 318T54 369T98 420T158 442Q197 442 223 419T250 357Q250 340 236 301T196 196T154 83Q149 61 149 51Q149 26 166 26Q175 26 185 29T208 43T235 78T260 137Q263 149 265 151T282 153Q302 153 302 143Q302 135 293 112T268 61T223 11T161 -11Q129 -11 102 10T74 74Q74 91 79 106T122 220Q160 321 166 341T173 380Q173 404 156 404H154Q124 404 99 371T61 287Q60 286 59 284T58 281T56 279T53 278T49 278T41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mo" transform="translate(1385.8,0)"><path data-c="3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path></g><g data-mml-node="mi" transform="translate(2441.6,0)"><path data-c="1D437" d="M287 628Q287 635 230 637Q207 637 200 638T193 647Q193 655 197 667T204 682Q206 683 403 683Q570 682 590 682T630 676Q702 659 752 597T803 431Q803 275 696 151T444 3L430 1L236 0H125H72Q48 0 41 2T33 11Q33 13 36 25Q40 41 44 43T67 46Q94 46 127 49Q141 52 146 61Q149 65 218 339T287 628ZM703 469Q703 507 692 537T666 584T629 613T590 629T555 636Q553 636 541 636T512 636T479 637H436Q392 637 386 627Q384 623 313 339T242 52Q242 48 253 48T330 47Q335 47 349 47T373 46Q499 46 581 128Q617 164 640 212T683 339T703 469Z"></path></g><g data-mml-node="mo" transform="translate(3269.6,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mi" transform="translate(3658.6,0)"><path data-c="1D452" d="M39 168Q39 225 58 272T107 350T174 402T244 433T307 442H310Q355 442 388 420T421 355Q421 265 310 237Q261 224 176 223Q139 223 138 221Q138 219 132 186T125 128Q125 81 146 54T209 26T302 45T394 111Q403 121 406 121Q410 121 419 112T429 98T420 82T390 55T344 24T281 -1T205 -11Q126 -11 83 42T39 168ZM373 353Q367 405 305 405Q272 405 244 391T199 357T170 316T154 280T149 261Q149 260 169 260Q282 260 327 284T373 353Z"></path></g><g data-mml-node="msub" transform="translate(4124.6,0)"><g data-mml-node="mi"><path data-c="1D439" d="M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z"></path></g><g data-mml-node="mi" transform="translate(676,-150) scale(0.707)"><path data-c="1D456" d="M184 600Q184 624 203 642T247 661Q265 661 277 649T290 619Q290 596 270 577T226 557Q211 557 198 567T184 600ZM21 287Q21 295 30 318T54 369T98 420T158 442Q197 442 223 419T250 357Q250 340 236 301T196 196T154 83Q149 61 149 51Q149 26 166 26Q175 26 185 29T208 43T235 78T260 137Q263 149 265 151T282 153Q302 153 302 143Q302 135 293 112T268 61T223 11T161 -11Q129 -11 102 10T74 74Q74 91 79 106T122 220Q160 321 166 341T173 380Q173 404 156 404H154Q124 404 99 371T61 287Q60 286 59 284T58 281T56 279T53 278T49 278T41 278H27Q21 284 21 287Z"></path></g></g><g data-mml-node="mo" transform="translate(5094.5,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>。<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="1.729ex" height="1.538ex" role="img" focusable="false" viewBox="0 -680 764 680"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D438" d="M492 213Q472 213 472 226Q472 230 477 250T482 285Q482 316 461 323T364 330H312Q311 328 277 192T243 52Q243 48 254 48T334 46Q428 46 458 48T518 61Q567 77 599 117T670 248Q680 270 683 272Q690 274 698 274Q718 274 718 261Q613 7 608 2Q605 0 322 0H133Q31 0 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H757Q764 676 764 669Q764 664 751 557T737 447Q735 440 717 440H705Q698 445 698 453L701 476Q704 500 704 528Q704 558 697 578T678 609T643 625T596 632T532 634H485Q397 633 392 631Q388 629 386 622Q385 619 355 499T324 377Q347 376 372 376H398Q464 376 489 391T534 472Q538 488 540 490T557 493Q562 493 565 493T570 492T572 491T574 487T577 483L544 351Q511 218 508 216Q505 213 492 213Z"></path></g></g></g></svg></mjx-container>和<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="1.873ex" height="1.545ex" role="img" focusable="false" viewBox="0 -683 828 683"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D437" d="M287 628Q287 635 230 637Q207 637 200 638T193 647Q193 655 197 667T204 682Q206 683 403 683Q570 682 590 682T630 676Q702 659 752 597T803 431Q803 275 696 151T444 3L430 1L236 0H125H72Q48 0 41 2T33 11Q33 13 36 25Q40 41 44 43T67 46Q94 46 127 49Q141 52 146 61Q149 65 218 339T287 628ZM703 469Q703 507 692 537T666 584T629 613T590 629T555 636Q553 636 541 636T512 636T479 637H436Q392 637 386 627Q384 623 313 339T242 52Q242 48 253 48T330 47Q335 47 349 47T373 46Q499 46 581 128Q617 164 640 212T683 339T703 469Z"></path></g></g></g></svg></mjx-container>以[3]为主架构，中间的残差块被去掉，因为要采用显式方式融合风格。</p>
+<p>这个架构可以允许同时训练无限个风格图像，滤波器组由卷积层构成，采用随机初始化来训练，两个分支在训练时交替进行，每进行T次风格化分支训练，就进行一次自动编码器分支的训练。损失函数采用了[3]中的感知损失以及一个简单的输入图像和输出图像之间的均方差(MEA)损失。</p>
+<p>这样的模型结构，使得一种新风格只需要训练对应的滤波器组而无需训练整个网络(自动编码器是共享的)，训练后的网络实现了内容与风格的完全分离，让不同风格的分享变得方便高效(只用把那个滤波器组发过去就好)，还可以实现局部区域的风格迁移，甚至可以通过多个滤波器组的组合来使得图像融合多种风格，自由度一下子就提高咯^ ^ 。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>以上是神经风格迁移技术的一些重要的文献的粗略的笔记介绍，里面有很多方法是比较主流的应用，也是我打算使用的技术，不过风格迁移还有很多很多方法及改进策略，例如基于GAN对抗学习的方法。[12]这篇综述对这些讲得非常广泛综合，感兴趣的小伙伴还是很建议看看的。</p>
+<h2 id="参考博客："><a href="#参考博客：" class="headerlink" title="参考博客："></a>参考博客：</h2><ol>
+<li>知乎 腾讯云加社区 基于深度学习的图像真实风格迁移<br>URL：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/28605436">https://zhuanlan.zhihu.com/p/28605436</a></li>
+<li>知乎 雨夜听风 Style Transfer | 风格迁移综述<br>URL：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/57564626">https://zhuanlan.zhihu.com/p/57564626</a></li>
+<li>知乎 grayxu 风格迁移（Style Transfer）论文阅读整理(一)<br>URL：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/37638591">https://zhuanlan.zhihu.com/p/37638591</a></li>
+</ol>
+<h2 id="参考文献："><a href="#参考文献：" class="headerlink" title="参考文献："></a>参考文献：</h2><p>[1] Leon A. Gatys, Alexander S. Ecker, Matthias Bethge. A Neural Algorithm of Artistic Style. arXiv:1508.06576v2 arXiv:1508.06576v2 [cs.CV]  2 Sep 2015</p>
+<p>[2] Leon A. Gatys, Alexander S. Ecker, Matthias Bethge. Image Style Transfer Using Convolutional Neural Networks. In CVPR, 2016 </p>
+<p>[3] Justin Johnson, Alexandre Alahi, Li Fei-Fei. Perceptual Losses for Real-Time Style Transfer<br>and Super-Resolution. arXiv:1603.08155v1  [cs.CV]  27 Mar 2016</p>
+<p>[4] Dmitry Ulyanov, Vadim Lebedev, Andrea V edaldi, Victor Lempitsky. Texture Networks: Feed-forward Synthesis of Textures and Stylized Images. arXiv:1603.03417v1 [cs.CV] 10 Mar 2016</p>
+<p>[5] Dmitry Ulyanov, Andrea V edaldi, Victor Lempitsky. Instance Normalization: The Missing Ingredient for Fast Stylization. arXiv:1607.08022v3  [cs.CV]  6 Nov 2017</p>
+<p>[6] Fujun Luan, Sylvain Paris, Eli Shechtman, Kavita Bala. Deep Photo Style Transfer. In CVPR, 2017</p>
+<p>[7] A. Levin, D. Lischinski, and Y. Weiss. A closed-form solution to natural image matting. IEEE Transactions on Pattern Analysis and Machine Intelligence, 30(2):228–242, 2008.</p>
+<p>[8] L.-C. Chen, G. Papandreou, I. Kokkinos, K. Murphy, and A. L.Y uille. Deeplab: Semantic image segmentation with deep convolutional nets, atrous convolution, and fully connected crfs. arXiv preprint arXiv:1606.00915, 2016</p>
+<p>[9] Dongdong Chen, Lu Yuan, Jing Liao, Nenghai Yu, Gang Hua. StyleBank: An Explicit Representation for Neural Image Style Transfer. arXiv:1703.09210v2  [cs.CV]  28 Mar 2017</p>
+<p>[10] Xun Huang, Serge Belongie. Arbitrary Style Transfer in Real-time with Adaptive Instance Normalization. In ICCV, 2017</p>
+<p>[11] Vincent Dumoulin, Jonathon Shlens, Manjunath Kudlur. A learned Representation For Artistic Style. arXiv:1610.07629v5  [cs.CV]  9 Feb 2017. In ICLR, 2017</p>
+<p>[12] 唐稔为，刘启和，谭浩. 神经风格迁移模型综述[J]. 计算机工程与应用, 2021, 57(19): 32-43.</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/06/24/%E5%8D%9A%E5%AE%A2%E5%BB%BA%E7%AB%8B%E5%92%AF/" rel="prev" title="博客建立咯">
+      <i class="fa fa-chevron-left"></i> 博客建立咯
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%97%A9%E6%9C%9F"><span class="nav-number">2.</span> <span class="nav-text">早期</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%80%E5%B1%B1%E4%B9%8B%E4%BD%9C"><span class="nav-number">3.</span> <span class="nav-text">开山之作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E6%97%B6%E9%A3%8E%E6%A0%BC%E8%BF%81%E7%A7%BB"><span class="nav-number">4.</span> <span class="nav-text">实时风格迁移</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%82%E4%BA%8E%E9%A3%8E%E6%A0%BC%E8%BF%81%E7%A7%BB%E7%9A%84%E5%AE%9E%E4%BE%8B%E5%BD%92%E4%B8%80%E5%8C%96"><span class="nav-number">5.</span> <span class="nav-text">适于风格迁移的实例归一化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9B%B4%E5%A5%BD%E7%9A%84%E5%AE%9E%E4%BE%8B%E5%BD%92%E4%B8%80%E5%8C%96"><span class="nav-number">6.</span> <span class="nav-text">更好的实例归一化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9D%A1%E4%BB%B6%E5%AE%9E%E4%BE%8B%E5%BD%92%E4%B8%80%E5%8C%96-conditional-IN"><span class="nav-number">6.1.</span> <span class="nav-text">条件实例归一化(conditional IN)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E9%80%82%E5%BA%94%E5%AE%9E%E4%BE%8B%E5%BD%92%E4%B8%80%E5%8C%96-adaptive-IN"><span class="nav-number">6.2.</span> <span class="nav-text">自适应实例归一化(adaptive IN)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E5%B1%80%E9%83%A8%E4%BB%BF%E5%B0%84%E5%8F%98%E6%8D%A2%E4%B8%8E%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2%E7%9A%84%E8%BF%81%E7%A7%BB%E7%BA%A6%E6%9D%9F"><span class="nav-number">7.</span> <span class="nav-text">基于局部仿射变换与语义分割的迁移约束</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E7%A6%BB%E7%9A%84%E9%A3%8E%E6%A0%BC%E4%B8%8E%E5%86%85%E5%AE%B9"><span class="nav-number">8.</span> <span class="nav-text">分离的风格与内容</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">9.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E5%8D%9A%E5%AE%A2%EF%BC%9A"><span class="nav-number">10.</span> <span class="nav-text">参考博客：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE%EF%BC%9A"><span class="nav-number">11.</span> <span class="nav-text">参考文献：</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="yulelanmei"
+      src="/images/head-img.jpg">
+  <p class="site-author-name" itemprop="name">yulelanmei</p>
+  <div class="site-description" itemprop="description">放松一下吧~</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">2</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; Thu Jun 23 2022 08:00:00 GMT+0800 (中国标准时间) – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">yulelanmei</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">7k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">7 分钟</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 支持~
+  </div>
+
+
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客数<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+<!-- 不蒜子计数初始值纠正 -->
+<script>
+$(document).ready(function() {
+
+    var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+    var countOffset = 20000;  // 初始化首次数据
+
+    function fixCount() {            
+       if (document.getElementById("busuanzi_container_site_pv").style.display != "none")
+        {
+            $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + countOffset); 
+            clearInterval(int);
+        }                  
+        if ($("#busuanzi_container_site_pv").css("display") != "none")
+        {
+            $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + countOffset); // 加上初始数据 
+            clearInterval(int); // 停止检测
+        }  
+    }
+       	
+});
+</script> 
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/three-waves.min.js"></script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
