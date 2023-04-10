@@ -19,12 +19,12 @@
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":{"gitalk":{"order":-1}},"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
   <meta name="description" content="重点风格迁移paper一览">
 <meta property="og:type" content="article">
-<meta property="og:title" content="基于神经网络的风格迁移初尝试-中">
+<meta property="og:title" content="基于神经网络的风格迁移初尝试(中)">
 <meta property="og:url" content="http://example.com/2023/03/19/%E5%9F%BA%E4%BA%8E%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E9%A3%8E%E6%A0%BC%E8%BF%81%E7%A7%BB%E5%88%9D%E5%B0%9D%E8%AF%95-%E4%B8%AD/index.html">
 <meta property="og:site_name" content="蓝莓的麦田">
 <meta property="og:description" content="重点风格迁移paper一览">
@@ -38,8 +38,9 @@
 <meta property="og:image" content="http://example.com/images/2019_Identity_Loss.png">
 <meta property="og:image" content="http://example.com/images/My%20StyleTrans.png">
 <meta property="article:published_time" content="2023-03-19T11:39:36.000Z">
-<meta property="article:modified_time" content="2023-03-19T11:58:27.031Z">
+<meta property="article:modified_time" content="2023-04-10T10:52:14.587Z">
 <meta property="article:author" content="yulelanmei">
+<meta property="article:tag" content="深度学习">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://example.com/images/2017_universal_styleTranfer.png">
 
@@ -56,7 +57,7 @@
   };
 </script>
 
-  <title>基于神经网络的风格迁移初尝试-中 | 蓝莓的麦田</title>
+  <title>基于神经网络的风格迁移初尝试(中) | 蓝莓的麦田</title>
   
 
 
@@ -286,7 +287,7 @@ mjx-container[display="true"] + br {
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          基于神经网络的风格迁移初尝试-中
+          基于神经网络的风格迁移初尝试(中)
         </h1>
 
         <div class="post-meta">
@@ -295,10 +296,16 @@ mjx-container[display="true"] + br {
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2023-03-19 19:39:36 / 修改时间：19:58:27" itemprop="dateCreated datePublished" datetime="2023-03-19T19:39:36+08:00">2023-03-19</time>
+              <time title="创建时间：2023-03-19 19:39:36" itemprop="dateCreated datePublished" datetime="2023-03-19T19:39:36+08:00">2023-03-19</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-04-10 18:52:14" itemprop="dateModified" datetime="2023-04-10T18:52:14+08:00">2023-04-10</time>
+              </span>
 
           
             <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
@@ -420,6 +427,9 @@ mjx-container[display="true"] + br {
     
 
       <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"># 深度学习</a>
+          </div>
 
         
 
@@ -443,6 +453,7 @@ mjx-container[display="true"] + br {
 
           </div>
           
+    <div class="comments" id="gitalk-container"></div>
 
 <script>
   window.addEventListener('tabs:register', () => {
@@ -508,6 +519,10 @@ mjx-container[display="true"] + br {
           <span class="site-state-item-count">3</span>
           <span class="site-state-item-name">日志</span>
         </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">标签</span>
       </div>
   </nav>
 </div>
@@ -711,6 +726,26 @@ $(document).ready(function() {
     
 
   
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '2b6b976f7671d1787836',
+      clientSecret: '1b555cdb9c26a16b66c7230b49dfc85b27b54bfa',
+      repo        : 'yulelanmei-s-blog-comments',
+      owner       : 'yulelanmei',
+      admin       : ['yulelanmei'],
+      id          : '809270b6cde911602c628cd19f8eef6f',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
 
 </body>
 </html>
